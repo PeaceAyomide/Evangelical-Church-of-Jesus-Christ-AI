@@ -86,7 +86,7 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black/40 backdrop-blur-md flex">
+    <div className="h-[100dvh] bg-black/40 backdrop-blur-md flex">
       <div className="w-full bg-slate-800/90 backdrop-blur-sm flex flex-col shadow-xl">
         {/* Fixed Header */}
         <div className="bg-slate-700 p-3 sm:p-4 flex items-center gap-3 sm:gap-4 z-10">
