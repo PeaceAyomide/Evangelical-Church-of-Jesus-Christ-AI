@@ -135,7 +135,7 @@ const App = () => {
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Ask about faith, scripture, or our church..."
-              className="flex-1 bg-slate-800 text-white rounded-lg px-3 sm:px-4 py-2 text-sm sm:text-base 
+              className="flex-1 bg-slate-800 text-white rounded-lg px-3 sm:px-4 py-2 text-base
                        focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none break-words
                        min-h-[40px] w-full"
               onKeyDown={(e) => {
