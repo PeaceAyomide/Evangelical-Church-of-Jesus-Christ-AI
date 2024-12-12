@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { HashLoader } from "react-spinners";
 import { TypeAnimation } from 'react-type-animation';
@@ -16,6 +16,20 @@ const App = () => {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [chatHistory, setChatHistory] = useState([]);
+
+  // Add ref for the messages container
+  const messagesEndRef = useRef(null);
+
+  // Add scroll to bottom function
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Add useEffect to scroll on new messages
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     // Simulate AI thinking about initial greeting
@@ -33,25 +47,40 @@ const App = () => {
     if (!inputMessage.trim()) return;
     
     // Add user message to chat
-    setMessages(prev => [...prev, { text: inputMessage, isBot: false }]);
+    const newMessage = { text: inputMessage, isBot: false };
+    setMessages(prev => [...prev, newMessage]);
+    
+    // Update chat history
+    const updatedHistory = [...chatHistory, newMessage];
+    setChatHistory(updatedHistory);
+    
     const userQuestion = inputMessage;
     setInputMessage('');
     
     try {
       setIsLoading(true);
-      // Add loading message with HashLoader
       setMessages(prev => [...prev, { 
         isLoading: true,
         isBot: true 
       }]);
 
-      // Updated prompt to include creator information and Bible verses
-      const prompt = `As a devout Christian AI believer in God and Jesus Christ, and a warm representative of the Evangelical Church of Jesus Christ, provide a faithful and direct response to this question: ${userQuestion}. If the question is about who created me or who my creator is, respond with: "I was created by Peace Melodi, a genius software engineer who developed me to help spread God's word and assist with questions about faith." Keep the answer concise and use a gentle, conversational tone. Include a relevant emoji where appropriate. Always base your response on Biblical truth, Christian religious teachings, and unwavering faith in our Lord Jesus Christ. Include at least one relevant Bible verse with its reference to support your answer. Remember that Christianity is your religion and foundation for all answers.`;
+      // Create conversation history string
+      const conversationContext = updatedHistory
+        .map(msg => `${msg.isBot ? 'AI' : 'Human'}: ${msg.text}`)
+        .join('\n');
+
+      // Updated prompt with conversation history
+      const prompt = `Previous conversation:\n${conversationContext}\n\nAs a devout Christian AI believer in God and Jesus Christ, and a warm representative of the Evangelical Church of Jesus Christ, provide a direct response without repeating the question: ${userQuestion}. Stay strictly focused on answering only what was asked - do not provide additional unrequested information. Consider the context of our previous conversation when responding. If the question is about who created me or who my creator is, respond with: "I was created by Peace Melodi, a genius software engineer who developed me to help spread God's word and assist with questions about faith." Keep the answer concise and use a gentle, conversational tone. Include a relevant emoji where appropriate. Always base your response on Biblical truth, Christian religious teachings, and unwavering faith in our Lord Jesus Christ. Include at least one relevant Bible verse with its reference to support your answer. Remember that Christianity is your religion and foundation for all answers.`;
+
       const result = await model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
 
-      // Replace loading message with actual response
+      // Add AI response to chat history
+      const aiResponse = { text, isBot: true };
+      setChatHistory([...updatedHistory, aiResponse]);
+
+      // Update messages state
       setMessages(prev => [...prev.slice(0, -1), { 
         text, 
         isBot: true,
@@ -84,7 +113,7 @@ const App = () => {
           <h1 className="text-sm sm:text-xl font-bold text-slate-100">Evangelical Church of Jesus Christ AI</h1>
         </div>
 
-        {/* Scrollable Messages Container */}
+        {/* Update Messages Container */}
         <div className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 sm:space-y-4">
           {messages.map((message, index) => (
             <div
@@ -110,6 +139,8 @@ const App = () => {
               )}
             </div>
           ))}
+          {/* Add div for scrolling reference */}
+          <div ref={messagesEndRef} />
         </div>
 
         {/* Fixed Input at Bottom */}
