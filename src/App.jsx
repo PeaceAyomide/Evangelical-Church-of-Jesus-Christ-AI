@@ -132,7 +132,7 @@ Current question: ${userQuestion}`;
         </div>
 
         {/* Messages Container */}
-        <div className="flex-1 p-2 sm:p-4 overflow-y-scroll space-y-2 sm:space-y-4 
+        <div className="flex-1 p-2 sm:p-4 overflow-y-auto space-y-2 sm:space-y-4 
                       overflow-x-hidden
                       scrollbar-thin
                       scrollbar-track-slate-900
