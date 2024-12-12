@@ -22,14 +22,22 @@ const App = () => {
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
-  // Update scroll to bottom function to check if we're already near bottom
+  // Update scroll to bottom function with more precise control
   const scrollToBottom = () => {
     const container = messagesContainerRef.current;
     if (container) {
       const { scrollHeight, scrollTop, clientHeight } = container;
-      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100; // within 100px of bottom
+      // Check if user has scrolled up significantly (more than 300px from bottom)
+      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+      const isSignificantlyScrolledUp = distanceFromBottom > 300;
       
-      if (isNearBottom) {
+      // Only auto-scroll if:
+      // 1. User is very close to bottom (within 100px) OR
+      // 2. This is a new user message (last message is not from bot)
+      const isNearBottom = distanceFromBottom < 100;
+      const isUserMessage = messages[messages.length - 1]?.isBot === false;
+      
+      if (isNearBottom || (isUserMessage && !isSignificantlyScrolledUp)) {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }
     }
@@ -111,7 +119,7 @@ const App = () => {
     <div className="min-h-screen bg-black/40 backdrop-blur-md flex">
       <div className="w-full bg-slate-800/90 backdrop-blur-sm flex flex-col shadow-xl">
         {/* Fixed Header */}
-        <div className="bg-slate-700 p-3 sm:p-4 flex items-center gap-3 sm:gap-4 sticky top-0 z-10">
+        <div className="bg-slate-700 p-3 sm:p-4 flex items-center gap-3 sm:gap-4 z-10">
           <div className="w-12 h-12 sm:w-[4rem] sm:h-[4rem] rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 shadow-lg overflow-hidden">
             <img 
               src="https://plus.unsplash.com/premium_vector-1724847824304-0e6a185ffb00?q=80&w=1800&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
@@ -122,10 +130,10 @@ const App = () => {
           <h1 className="text-sm sm:text-xl font-bold text-slate-100">Evangelical Church of Jesus Christ AI</h1>
         </div>
 
-        {/* Update Messages Container with ref */}
+        {/* Messages Container - Add h-[calc(100vh-132px)] to fix scrollable area */}
         <div 
           ref={messagesContainerRef}
-          className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 sm:space-y-4"
+          className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 sm:space-y-4 h-[calc(100vh-132px)]"
         >
           {messages.map((message, index) => (
             <div
@@ -155,7 +163,7 @@ const App = () => {
         </div>
 
         {/* Fixed Input at Bottom */}
-        <div className="bg-slate-700 sticky bottom-0 z-10">
+        <div className="bg-slate-700 z-10">
           <form onSubmit={handleSend} className="p-2 sm:p-4 flex gap-2">
             <textarea
               value={inputMessage}
