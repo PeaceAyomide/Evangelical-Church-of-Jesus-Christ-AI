@@ -100,12 +100,12 @@ const App = () => {
           <h1 className="text-sm sm:text-xl font-bold text-slate-100">Evangelical Church of Jesus Christ AI</h1>
         </div>
 
-        {/* Messages Container - simplified */}
-        <div className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 sm:space-y-4">
+        {/* Messages Container */}
+        <div className="flex-1 p-2 sm:p-4 overflow-y-auto space-y-2 sm:space-y-4">
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`max-w-[85%] sm:max-w-[70%] p-2.5 sm:p-3 rounded-xl text-sm sm:text-base break-words ${
+              className={`max-w-[85%] sm:max-w-[70%] p-2 sm:p-3 rounded-xl text-sm sm:text-base break-words ${
                 message.isBot
                   ? 'bg-slate-700 text-white rounded-bl-sm self-start'
                   : 'bg-gradient-to-br from-teal-500 to-emerald-500 text-white rounded-br-sm self-end'
@@ -128,7 +128,7 @@ const App = () => {
           ))}
         </div>
 
-        {/* Fixed Input at Bottom */}
+        {/* Fixed Input at Bottom - adjust padding for mobile */}
         <div className="bg-slate-700 z-10">
           <form onSubmit={handleSend} className="p-2 sm:p-4 flex gap-2">
             <textarea
