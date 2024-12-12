@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { HashLoader } from "react-spinners";
 import { TypeAnimation } from 'react-type-animation';
@@ -17,36 +17,6 @@ const App = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
-
-  // Add ref for the messages container
-  const messagesEndRef = useRef(null);
-  const messagesContainerRef = useRef(null);
-
-  // Update scroll to bottom function with more precise control
-  const scrollToBottom = () => {
-    const container = messagesContainerRef.current;
-    if (container) {
-      const { scrollHeight, scrollTop, clientHeight } = container;
-      // Check if user has scrolled up significantly (more than 300px from bottom)
-      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-      const isSignificantlyScrolledUp = distanceFromBottom > 300;
-      
-      // Only auto-scroll if:
-      // 1. User is very close to bottom (within 100px) OR
-      // 2. This is a new user message (last message is not from bot)
-      const isNearBottom = distanceFromBottom < 100;
-      const isUserMessage = messages[messages.length - 1]?.isBot === false;
-      
-      if (isNearBottom || (isUserMessage && !isSignificantlyScrolledUp)) {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }
-    }
-  };
-
-  // Add useEffect to scroll on new messages
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   useEffect(() => {
     // Simulate AI thinking about initial greeting
@@ -130,11 +100,8 @@ const App = () => {
           <h1 className="text-sm sm:text-xl font-bold text-slate-100">Evangelical Church of Jesus Christ AI</h1>
         </div>
 
-        {/* Messages Container - Add h-[calc(100vh-132px)] to fix scrollable area */}
-        <div 
-          ref={messagesContainerRef}
-          className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 sm:space-y-4 h-[calc(100vh-132px)]"
-        >
+        {/* Messages Container - simplified */}
+        <div className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 sm:space-y-4">
           {messages.map((message, index) => (
             <div
               key={index}
@@ -159,7 +126,6 @@ const App = () => {
               )}
             </div>
           ))}
-          <div ref={messagesEndRef} />
         </div>
 
         {/* Fixed Input at Bottom */}
