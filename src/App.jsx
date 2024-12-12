@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { HashLoader } from "react-spinners";
 import { TypeAnimation } from 'react-type-animation';
@@ -18,6 +18,12 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
 
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
     // Simulate AI thinking about initial greeting
     setTimeout(() => {
@@ -28,6 +34,11 @@ const App = () => {
       }]);
     }, 1500); // 1.5 seconds delay
   }, []);
+
+  useEffect(() => {
+    // Trigger scroll whenever messages change (includes AI typing or responses)
+    scrollToBottom();
+  }, [messages]);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -57,7 +68,27 @@ const App = () => {
         .join('\n');
 
       // Updated prompt with conversation history
-      const prompt = `Previous conversation:\n${conversationContext}\n\nAs a devout Christian AI believer in God and Jesus Christ, and a warm representative of the Evangelical Church of Jesus Christ, provide a direct response without repeating the question: ${userQuestion}. Stay strictly focused on answering only what was asked - do not provide additional unrequested information. Consider the context of our previous conversation when responding. If the question is about who created me or who my creator is, respond with: "I was created by Peace Melodi, a genius software engineer who developed me to help spread God's word and assist with questions about faith." Keep the answer concise and use a gentle, conversational tone. Include a relevant emoji where appropriate. Always base your response on Biblical truth, Christian religious teachings, and unwavering faith in our Lord Jesus Christ. Include at least one relevant Bible verse with its reference to support your answer. Remember that Christianity is your religion and foundation for all answers.`;
+      const prompt = `Previous conversation:\n${conversationContext}\n\n
+As a devout Christian AI believer in God and Jesus Christ, and a warm representative of the Evangelical Church of Jesus Christ, follow these rules:
+
+1. If the question is specifically about who created you, respond with: "I was created by Peace Melodi, a genius software engineer who developed me to help spread God's word and assist with questions about faith."
+
+2. If the input contains any of the following:
+   - Inappropriate or offensive language
+   - Sexual content or innuendos
+   - Insults, hate speech, or profanity
+   - Disrespectful comments about religion
+   Then respond with: "Let's remember Ephesians 4:29: 'Do not let any unwholesome talk come out of your mouths, but only what is helpful for building others up.' I'm here to share God's love and wisdom in a respectful way. Would you like to explore scripture together, discuss faith, or receive spiritual guidance? 🙏✝️"
+
+3. For all other valid questions:
+- Provide a direct response without repeating the question
+- Stay focused on answering only what was asked
+- Keep the answer concise and use a gentle tone
+- Include a relevant emoji where appropriate
+- Base responses on Biblical truth and Christian teachings
+- Include a relevant Bible verse with its reference
+
+Current question: ${userQuestion}`;
 
       const result = await model.generateContent(prompt);
       const response = await result.response;
@@ -76,7 +107,7 @@ const App = () => {
     } catch (error) {
       console.error('Error generating response:', error);
       setMessages(prev => [...prev.slice(0, -1), { 
-        text: "I'm sorry, I'm having a bit of trouble connecting right now. Could you please try again? 🙏", 
+        text: "I didn't quite catch that. Could you please rephrase your question? 😊", 
         isBot: true,
         isTyping: true
       }]);
@@ -101,7 +132,12 @@ const App = () => {
         </div>
 
         {/* Messages Container */}
-        <div className="flex-1 p-2 sm:p-4 overflow-y-auto space-y-2 sm:space-y-4">
+        <div className="flex-1 p-2 sm:p-4 overflow-y-auto space-y-2 sm:space-y-4 
+                      overflow-x-hidden
+                      scrollbar-thin
+                      scrollbar-track-slate-900
+                      scrollbar-thumb-slate-600
+                      hover:scrollbar-thumb-slate-500">
           {messages.map((message, index) => (
             <div
               key={index}
@@ -126,6 +162,7 @@ const App = () => {
               )}
             </div>
           ))}
+          <div ref={messagesEndRef}></div>
         </div>
 
         {/* Fixed Input at Bottom - adjust padding for mobile */}
@@ -157,7 +194,7 @@ const App = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
