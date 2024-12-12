@@ -20,10 +20,19 @@ const App = () => {
 
   // Add ref for the messages container
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
-  // Add scroll to bottom function
+  // Update scroll to bottom function to check if we're already near bottom
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const container = messagesContainerRef.current;
+    if (container) {
+      const { scrollHeight, scrollTop, clientHeight } = container;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100; // within 100px of bottom
+      
+      if (isNearBottom) {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
+    }
   };
 
   // Add useEffect to scroll on new messages
@@ -113,8 +122,11 @@ const App = () => {
           <h1 className="text-sm sm:text-xl font-bold text-slate-100">Evangelical Church of Jesus Christ AI</h1>
         </div>
 
-        {/* Update Messages Container */}
-        <div className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 sm:space-y-4">
+        {/* Update Messages Container with ref */}
+        <div 
+          ref={messagesContainerRef}
+          className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 sm:space-y-4"
+        >
           {messages.map((message, index) => (
             <div
               key={index}
@@ -139,7 +151,6 @@ const App = () => {
               )}
             </div>
           ))}
-          {/* Add div for scrolling reference */}
           <div ref={messagesEndRef} />
         </div>
 
